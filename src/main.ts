@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { AppModule } from './app.module';
+// import path from 'path';
+const path = require('path')
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

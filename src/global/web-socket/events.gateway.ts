@@ -3,16 +3,19 @@ import {
     MessageBody,
     SubscribeMessage,
     WebSocketGateway,
-    WebSocketServer,
-    WsResponse,
+    WebSocketServer
 } from '@nestjs/websockets';
 import { Socket } from 'dgram';
 import 'dotenv/config';
-import { Observable, from } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Server } from 'ws';
     
-@WebSocketGateway( Number(process.env.WEBSOCKET_PORT),  { transports: ['websocket'] } )
+@WebSocketGateway( 
+    Number(process.env.WEBSOCKET_PORT),  
+    { 
+        transports: ['websocket'],
+        cors: { origin: '*' },
+    } 
+)
 export class EventsGateway {
     
     @WebSocketServer()
@@ -25,21 +28,30 @@ export class EventsGateway {
 
     // validate Connection with webSocket
     public async handleConnection(client: any, req: Request) {
-        
+        console.log('Client connected');
     }
 
     // method listen when client disconnected
     public async handleDisconnect(client: any) {
         // check if public api node
+        console.log('Client Disconnected');
     }
 
-    @SubscribeMessage('events')
-    onEvent(client: any, data: any): Observable<WsResponse<number>> {
-    return from([1, 2, 3]).pipe(map(item => ({ event: 'events', data: item })));
-    }
-
-    @SubscribeMessage('events')
-        handleEvent( @MessageBody() data: string, @ConnectedSocket() client: Socket): string {
+    @SubscribeMessage('create-band')
+    handleEventCreateBand( @ConnectedSocket() client: Socket, @MessageBody() data: string,): string {
+        console.log(data);
         return data;
     }
+
+    @SubscribeMessage('Delete-band')
+    handleEventDeleteBand( @ConnectedSocket() client: Socket, @MessageBody() data: string,): string {
+        console.log(data);
+        return data;
+    }
+
+    // @SubscribeMessage('create-band')
+    // public handleEventAddBand( client: Socket, message: any): string {
+    //     console.log(message, client);
+    //     return message;
+    // }
 }
