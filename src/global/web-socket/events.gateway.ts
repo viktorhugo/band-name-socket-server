@@ -38,9 +38,15 @@ export class EventsGateway {
     }
 
     @SubscribeMessage('create-band')
-    handleEventCreateBand( @ConnectedSocket() client: Socket, @MessageBody() data: string,): string {
+    handleEventCreateBand( @ConnectedSocket() client: Socket, @MessageBody() data: string) {
         console.log(data);
-        return data;
+        const res = {
+            event: 'create-band', 
+            data: {
+
+            }
+        }
+        return res;
     }
 
     @SubscribeMessage('Delete-band')
