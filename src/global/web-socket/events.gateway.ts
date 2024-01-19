@@ -21,20 +21,38 @@ export class EventsGateway {
     @WebSocketServer()
     server: Server;
 
+    wsClients: Socket[] = [];
+
     // this execute after Init listen websocket
     afterInit() {
         console.warn(`Init WebSocket Server - Port:${process.env.WEBSOCKET_PORT}`);
     }
 
     // validate Connection with webSocket
-    public async handleConnection(client: any, req: Request) {
-        console.log('Client connected');
+    public async handleConnection(client: Socket, req: Request) {
+        this.wsClients.push(client);
+        console.log(`(Client connected) :: Total ==> ${this.wsClients.length}`);
     }
 
     // method listen when client disconnected
     public async handleDisconnect(client: any) {
         // check if public api node
-        console.log('Client Disconnected');
+        for (let i = 0; i < this.wsClients.length; i++) {
+            if (this.wsClients[i] === client) {
+                this.wsClients.splice(i, 1);
+                break;
+            }
+        }
+        console.log(`(Client Disconnected) :: Total ==>  ${this.wsClients.length}`);
+        //send message bradcast 
+        // this.broadcast('disconnect',{});
+    }
+
+    private broadcastMessage(event, message: any) {
+        const broadCastMessage = JSON.stringify(message);
+        for (let c of this.wsClients) {
+            c.send(broadCastMessage);
+        }
     }
 
     @SubscribeMessage('create-band')
@@ -42,11 +60,10 @@ export class EventsGateway {
         console.log(data);
         const res = {
             event: 'create-band', 
-            data: {
-
-            }
+            data: data
         }
-        return res;
+        client.emit('message', data);
+        // return res;
     }
 
     @SubscribeMessage('Delete-band')
